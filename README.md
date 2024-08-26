@@ -1,4 +1,4 @@
-<center> <h1>todo-scripts</h1> </center>
+<h3 style="text-align: center;">todo-script</h3>
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/Jorgedavyd/todo-script/main/source/logo.png" height=450 width=450>
