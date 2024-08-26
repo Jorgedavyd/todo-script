@@ -1,6 +1,6 @@
-<div style="text-align: center;">
-  <img src="https://raw.githubusercontent.com/Jorgedavyd/todo-script/main/source/logo.png" alt="Logo" style="width: 450px;">
-  <h1>todo-script</h1>
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <h1>todo-script</h1>
+    <img src="https://raw.githubusercontent.com/Jorgedavyd/todo-script/main/source/logo.png" alt="Logo" style="width: 450px;">
 </div>
 
 todo-script is a basic script that integrates inline TODOs from projects and obsidian tasks. It proposes an easy to use framework based on the Eisenhower-Matrix for task management.
