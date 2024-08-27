@@ -3,8 +3,8 @@ from analyzer import Analyzer
 import argparse
 
 class Main(Handler):
-    def __init__(self, source_path: str, obsidian_vault_project_path: str) -> None:
-        super().__init__(source_path, obsidian_vault_project_path)
+    def __init__(self, source_path: str, obsidian_vault_project_path: str, device: str) -> None:
+        super().__init__(source_path, obsidian_vault_project_path, device)
         self.analyzer = Analyzer(source_path)
     def __call__(self) -> None:
         self.analyzer()
@@ -19,5 +19,5 @@ if __name__ == '__main__':
     parser.add_argument('device', type=str, help="LLM inference in which device.")
     args = parser.parse_args()
     # Creating the task
-    Main(args.project_path, args.obsidian_vault_path)()
+    Main(args.project_path, args.obsidian_vault_path, args.device)()
 
