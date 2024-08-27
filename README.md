@@ -41,6 +41,7 @@ git clone https://github.com/Jorgedavyd/todo-script.git
 vim.keymap.set("n", "<leader>w", function()
     vim.cmd("w")
     local obsidian_vault_project_path = '/path/to/obsidian_vault'  -- Replace with your Obsidian vault path
+    -- Save the current buffer
     local project_path = '/path/to/project'  -- Replace with your project path
     local current_file = vim.fn.expand("%")  -- Get the current file path
     local command = string.format(
@@ -52,7 +53,36 @@ vim.keymap.set("n", "<leader>w", function()
     vim.cmd("silent !" .. command)
 end, { noremap = true, silent = true })
 ```
+If you want to map a template inline task:
 
+```lua
+vim.keymap.set("n", "<leader>/", function()
+    local date = os.date("%d%m%y")
+    local priority = "[P1]"
+    local description = "Description here"
+    local filetype = vim.bo.filetype
+    local comment_chars = {
+        lua = "--",
+        python = "#",
+        html = "<!--",
+        css = "/*",
+        json = "//",
+        markdown = "<!--",
+        -- Add more filetypes and their comment characters as needed
+    }
+    local comment_char = comment_chars[filetype] or "//"
+    local todo_template = string.format(
+        "%s TODO %s %s %s",
+        comment_char,
+        date,
+        priority,
+        description
+    )
+    local line_num = vim.fn.line(".")
+    local line_content = vim.fn.getline(line_num)
+    vim.fn.setline(line_num, line_content .. " " .. todo_template)
+end, { noremap = true, silent = true })
+```
 Now, every time you hit the `<leader>w` you'll be analyzing the current file for new tasks, uploading them to the respective obsidian project file with the corresponding solution of the RAG-based language model.
 
 ## Contact
