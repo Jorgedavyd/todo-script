@@ -13,14 +13,17 @@ PRIORITY_ICONS = {
     'high':
 }
 
+VALID_DEVICES = ['cpu', 'cuda']
+
 class Handler:
-    def __init__(self, source_path: str, obsidian_vault_project_path: str) -> None:
+    def __init__(self, source_path: str, obsidian_vault_project_path: str, device: str) -> None:
+        assert (device in VALID_DEVICES), "Not valid device"
         self.project_name: str = osp.basename(source_path)
         self.target_path = osp.join(obsidian_vault_project_path, self.project_name)
         os.makedirs(self.target_path, exist_ok = True)
         self.main_path: str = osp.join(SCRIPT_PATH, 'templates/main.md')
         self.todo_path: str = osp.join(SCRIPT_PATH, 'templates/TODO.md')
-        self.model = Model(source_path)
+        self.model = Model(source_path, device)
 
     def createTODO(self) -> None:
         with open(self.todo_path, 'x') as file:

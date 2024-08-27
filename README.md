@@ -41,14 +41,16 @@ git clone https://github.com/Jorgedavyd/todo-script.git
 vim.keymap.set("n", "<leader>w", function()
     vim.cmd("w")
     local obsidian_vault_project_path = '/path/to/obsidian_vault'  -- Replace with your Obsidian vault path
+    local device = 'cuda' -- Or 'cpu'
     -- Save the current buffer
     local project_path = '/path/to/project'  -- Replace with your project path
     local current_file = vim.fn.expand("%")  -- Get the current file path
     local command = string.format(
-        "todo-script --filepath %s --obsidian_vault_path %s --project_path %s",
+        "todo-script %s %s %s %s",
         current_file,
         obsidian_vault_project_path,
-        project_path
+        device,
+        project_path,
     )
     vim.cmd("silent !" .. command)
 end, { noremap = true, silent = true })
@@ -59,7 +61,7 @@ If you want to map a template inline task:
 vim.keymap.set("n", "<leader>/", function()
     local date = os.date("%d%m%y")
     local priority = "[P1]"
-    local description = "Description here"
+    local description = "[D1]"
     local filetype = vim.bo.filetype
     local comment_chars = {
         lua = "--",

@@ -6,5 +6,4 @@
 {{CODE_BLOCK_PLACEHOLDER}}
 ```
 
-#### Generated solution
 {{LLAMA_SOLUTION_PLACEHOLDER}}

@@ -17,6 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('filepath', type=str, help="The written file path.")
     parser.add_argument('project_path', type=str, help="The path where the codebase is stored.")
     parser.add_argument('obsidian_vault_path', type=str, help="The obsidian vault path to save the preprocessed tasks.")
+    parser.add_argument('device', type=str, help="LLM inference in which device.")
     args = parser.parse_args()
     # Creating the task
     Main(args.project_path, args.obsidian_vault_path)(args.file_path)
