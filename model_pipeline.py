@@ -13,6 +13,7 @@ class Model:
 
     def create_prompt(self, data: Dict[str, Union[int, str]]) -> str:
 
+        return
     def __call__(self, data: Dict[str, Union[int, str]]) -> str:
         prompt: str = self.create_prompt(data)
         return self.parsePrompt(prompt)

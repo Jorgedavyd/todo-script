@@ -15,6 +15,18 @@ todo-script is a basic script that integrates inline TODOs from projects and obs
 3. RAG informed models for each project.
 4. Code visualization in obsidian note.
 
+# How to use
+1. Declare the task as a comment on your code in one line.
+```cpp
+__global__ void KernelDeclaration(void) {
+    const unsigned int tid = threadIdx.x + blockIdx.x * blockDim.x; //TODO 080924 low Probably not valid parameter, look for the right descriptor.
+    //...
+};
+```
+2. Write your file with the declared `<leader>w` in Setup.
+
+Now you'll be able to see this task in your obsidian project management environment in `<vault_path>/projects/<project_name>` with an LLM inference based on your codebase and a preview of a chunk of code.
+
 # Setup for NeoVim / Vim
 1. Clone the script to /usr/bin.
 
