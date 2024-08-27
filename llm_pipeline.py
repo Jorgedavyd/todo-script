@@ -1,19 +1,21 @@
-import transformers
-import torch
+from utils import SCRIPT_PATH
 from typing import Dict, Union
 import os.path as osp
-from utils import SCRIPT_PATH
+import transformers
+import torch
 import os
 
 class Model:
-    def __init__(self, source_path: str) -> None:
+    def __init__(self, source_path: str, device: str) -> None:
         self.root_path = osp.join(SCRIPT_PATH, osp.basename(source_path))
         os.makedirs(self.root_path, exist_ok = True)
-        self.RAG_path = osp.join(self.root_path, 'rag.db') ## cuidado
+        self.RAG_path = osp.join(self.root_path, 'rag.db') ## TODO
+        self.device = device
 
     def create_prompt(self, data: Dict[str, Union[int, str]]) -> str:
-
+        #TODO
         return
+
     def __call__(self, data: Dict[str, Union[int, str]]) -> str:
         prompt: str = self.create_prompt(data)
         return self.parsePrompt(prompt)
@@ -23,7 +25,7 @@ class Model:
             "text-generation",
             model="meta-llama/Meta-Llama-3-8B-Instruct",
             model_kwargs={"torch_dtype": torch.bfloat16},
-            device="cuda",
+            device=self.device,
         )
         out = pipeline(
             prompt,

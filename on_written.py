@@ -14,7 +14,7 @@ class Main(Handler):
 if __name__ == '__main__':
     # Parsing the arguments to the python parser
     parser = argparse.ArgumentParser(description="Parse and validate a path.")
-    parser.add_argument('file_path', type=str, help="The written file path.")
+    parser.add_argument('filepath', type=str, help="The written file path.")
     parser.add_argument('project_path', type=str, help="The path where the codebase is stored.")
     parser.add_argument('obsidian_vault_path', type=str, help="The obsidian vault path to save the preprocessed tasks.")
     args = parser.parse_args()

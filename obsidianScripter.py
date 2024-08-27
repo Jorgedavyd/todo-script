@@ -2,7 +2,7 @@ import os.path as osp
 import shutil
 from typing import Dict, List, Union
 from utils import SCRIPT_PATH
-from model_pipeline import Model
+from llm_pipeline import Model
 import os
 
 DUE_DATE_ICON =
