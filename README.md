@@ -38,7 +38,19 @@ git clone https://github.com/Jorgedavyd/todo-script.git
 2. Add the following nonrecursive remap to nvim/vim.
 
 ```lua
-vim.keymap.set("n", "<leader>w", "<cmd>w<CR><cmd>silent !todo-script %<CR>")
+vim.keymap.set("n", "<leader>w", function()
+    vim.cmd("w")
+    local obsidian_vault_project_path = '/path/to/obsidian_vault'  -- Replace with your Obsidian vault path
+    local project_path = '/path/to/project'  -- Replace with your project path
+    local current_file = vim.fn.expand("%")  -- Get the current file path
+    local command = string.format(
+        "todo-script --filepath %s --obsidian_vault_path %s --project_path %s",
+        current_file,
+        obsidian_vault_project_path,
+        project_path
+    )
+    vim.cmd("silent !" .. command)
+end, { noremap = true, silent = true })
 ```
 
 Now, every time you hit the `<leader>w` you'll be analyzing the current file for new tasks, uploading them to the respective obsidian project file with the corresponding solution of the RAG-based language model.
