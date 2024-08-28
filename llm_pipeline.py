@@ -1,21 +1,66 @@
+import asyncio
+from collections import defaultdict
+from collections.abc import Coroutine
+from numpy._typing import NDArray
+from RAG_handling.embedding import CodeEmbedding
 from utils import SCRIPT_PATH
-from typing import Dict, Union
+from typing import Dict, List, Tuple, Union
+from torch import Tensor
 import os.path as osp
 import transformers
 import torch
+import faiss
 import os
 
 class Model:
-    def __init__(self, project_path: str, device: str) -> None:
+    def __init__(self, project_path: str, device: str, k: int) -> None:
+        self.k = k
         self.root_path = osp.join(SCRIPT_PATH, osp.basename(project_path))
         os.makedirs(self.root_path, exist_ok = True)
         self.src = '/usr/bin/todo-script'
         self.dataset_path: str = osp.join(self.src, 'dataset', osp.basename(self.root_path), 'data.index')
         self.device = device
+        self.index = faiss.read_index(self.dataset_path)
+        self.embedding = CodeEmbedding(project_path)
 
-    def create_prompt(self, data: Dict[str, Union[int, str]]) -> str:
-        #TODO
-        return
+    def retrieveCode(self, idx: List[int]) -> str:
+        path_list: Dict[str, List[int]] = defaultdict(list)
+        allowedPattern: Dict[str, List[int]] = defaultdict(list)
+
+        for key, value_list in self.embedding.metadata.items():
+            for i, value in enumerate(value_list):
+                if value in idx:
+                    path_list[key].append(value)
+                    allowedPattern[key].append(i)
+
+        tasks: List[Coroutine] = [self.embedding.getASTfromFile(path) for path in path_list]
+
+        rag_context: str = asyncio.run(self.execute_ast(tasks, path_list, allowedPattern))
+
+        return rag_context
+
+    async def execute_ast(self, tasks: List[Coroutine], path_list: Dict[str, List[int]], allowedPattern: Dict[str, List[int]]) -> str:
+        asts = await asyncio.gather(*tasks)
+
+        self.embedding.readCode(asts, list(path_list.keys()))
+
+        output_list: List[str] = [
+            self.embedding.code[path][idx] for path in path_list
+            for idx in allowedPattern[path]
+        ]
+
+        output: str = ''
+        for value in output_list:
+            output += value + '\n'*2
+
+        return output
+
+    def create_prompt(self, data: Dict[str, Union[int, str]], k: int) -> str:
+        actual_instance: str = self.retrieveCode(data['line'])
+        query_embedded: NDArray = self.embedding.embed(f"{actual_instance}{data['description']}").numpy()
+        _, I = self.index.search(query_embedded, self.k)
+        rag_context: str = self.retrieveCode(I)
+        return f"{actual_instance}\n\n{rag_context} Question: {data['description']}"
 
     def __call__(self, data: Dict[str, Union[int, str]]) -> str:
         prompt: str = self.create_prompt(data)
