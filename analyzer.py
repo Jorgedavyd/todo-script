@@ -7,7 +7,7 @@ import asyncio
 import json
 import os
 import re
-from utils import SCRIPT_PATH
+from utils import SCRIPT_PATH, get_filepaths, get_language
 
 VALID_PRIORITY = ['low', 'mid', 'high']
 
@@ -49,42 +49,11 @@ class Analyzer:
                 "date": date_format.isoformat(),
                 "priority": priority,
                 "description": description,
-                "language": self.get_language(path),
+                "language": get_language(path),
                 "path": path
             }
         else:
             raise ValueError('Not valid input query, TODO pattern doesn\'t match the expected one: TODO <date:%d%m%y> <priority> <description>')
-
-    def get_language(self, filepath: str) -> str:
-        extensions_to_languages: Dict[str, str] = {
-            '.py': 'python',
-            '.cpp': 'cpp',
-            '.c': 'c',
-            '.java': 'java',
-            '.js': 'javascript',
-            '.ts': 'typescript',
-            '.rb': 'ruby',
-            '.go': 'go',
-            '.php': 'php',
-            '.swift': 'swift',
-            '.kt': 'kotlin',
-            '.rs': 'rust',
-            '.html': 'html',
-            '.css': 'css',
-            '.json': 'json',
-            '.yaml': 'yaml',
-            '.md': 'markdown',
-            '.r': 'r',
-            '.m': 'objective-c',
-            '.sql': 'sql',
-            '.sh': 'bash',
-            '.bat': 'batch',
-            '.pl': 'perl'
-        }
-
-        _, ext = os.path.splitext(filepath)
-
-        return extensions_to_languages.get(ext, 'text')
 
     def new(self, line: str, idx: int, path: str) -> None:
         db_format: Dict[str, Union[str, int]] = self.parse_line(line, idx, path)
@@ -126,11 +95,7 @@ class Analyzer:
         return [self.single_file(path) for path in filepaths]
 
     def get_filepaths(self) -> List[str]:
-        filepaths = []
-        for dirpath, _, filenames in os.walk(self.src):
-            for filename in filenames:
-                filepaths.append(osp.join(dirpath, filename))
-        return filepaths
+        return get_filepaths(self.src)
 
     def single_call(self, path: str) -> None:
         asyncio.run(self.single_file(path))
