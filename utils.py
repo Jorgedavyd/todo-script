@@ -1,7 +1,7 @@
+from tree_sitter import Language, Parser
+from typing import List, Dict, Set
 import os.path as osp
 import os
-from typing import List, Dict, Set
-from tree_sitter import Language, Parser
 
 SCRIPT_PATH: str = '/usr/bin/todo-script'
 

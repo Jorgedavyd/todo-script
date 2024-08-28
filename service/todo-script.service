@@ -1,0 +1,12 @@
+[Unit]
+Description=todo script service handler, updates FAISS dataset for each project, upload TODOs to obsidian, deletes done tasks.
+After=network.target
+
+[Service]
+ExecStart= sh ./service.sh
+WorkingDirectory= /usr/bin/todo-script/service
+User=jenci
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

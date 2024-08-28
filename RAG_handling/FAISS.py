@@ -1,7 +1,6 @@
 from numpy._typing import NDArray
-from utils import get_filepaths
-from torch import Tensor
 from typing import Dict, List
+from torch import Tensor
 import os.path as osp
 import numpy as np
 import faiss
@@ -47,8 +46,7 @@ class FAISS:
         self.index.reconstruct_n(0, self.n_vectors, vectors)
         new_vectors: List[NDArray] = [
             vector for idx, vector in enumerate(vectors)
-                if idx not in relativeInd].extend(
-                e.numpy() for e in hiddenFeatures)
+                if idx not in relativeInd].extend([e.numpy() for e in hiddenFeatures])
         new_vector: NDArray = np.stack(new_vectors, axis = 0)
         new_index = faiss.IndexFlatL2(new_vector)
         faiss.write_index(new_index, self.dataset_path)

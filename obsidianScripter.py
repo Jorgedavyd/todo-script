@@ -1,10 +1,10 @@
+from typing import Dict, List, Union
+from llm_pipeline import Model
+from utils import SCRIPT_PATH
 import os.path as osp
 import shutil
-from typing import Dict, List, Union
-from utils import SCRIPT_PATH
-from llm_pipeline import Model
+import json
 import os
-
 DUE_DATE_ICON =
 
 PRIORITY_ICONS = {
@@ -15,15 +15,19 @@ PRIORITY_ICONS = {
 
 VALID_DEVICES = ['cpu', 'cuda']
 
-class Handler:
-    def __init__(self, source_path: str, obsidian_vault_project_path: str, device: str) -> None:
+class ObsidianIntegrationHandler:
+    def __init__(self, source_path: str, obsidian_vault_project_path: str, device: str, k: int) -> None:
         assert (device in VALID_DEVICES), "Not valid device"
         self.project_name: str = osp.basename(source_path)
         self.target_path = osp.join(obsidian_vault_project_path, self.project_name)
         os.makedirs(self.target_path, exist_ok = True)
         self.main_path: str = osp.join(SCRIPT_PATH, 'templates/main.md')
         self.todo_path: str = osp.join(SCRIPT_PATH, 'templates/TODO.md')
-        self.model = Model(source_path, device)
+        self.model = Model(source_path, device, k)
+        self.src: str = '/usr/bin/todo-script'
+        self.meta_path: str = osp.join(self.src, 'dataset', self.project_name, 'metadata')
+        with open(self.meta_path, 'r') as file:
+            self.metadata = json.load(file)
 
     def createTODO(self) -> None:
         with open(self.todo_path, 'x') as file:
@@ -41,7 +45,7 @@ class Handler:
             file.write('\n'.join(new_file))
 
     def inference(self, data: Dict[str, Union[str, int]]) -> str:
-        return self.model(data)
+        return self.model(data, self.metadata)
 
     def get_code_block(self, data: Dict[str, Union[int, str]]) -> str:
         idx: int = data['line']

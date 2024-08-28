@@ -1,13 +1,12 @@
-import asyncio
-from collections import defaultdict
+from embedding import CodeEmbedding
 from collections.abc import Coroutine
+from typing import Dict, List, Union
+from collections import defaultdict
 from numpy._typing import NDArray
-from RAG_handling.embedding import CodeEmbedding
-from utils import SCRIPT_PATH
-from typing import Dict, List, Tuple, Union
-from torch import Tensor
+from utils import SCRIPT_PATH, get_language
 import os.path as osp
 import transformers
+import asyncio
 import torch
 import faiss
 import os
@@ -23,17 +22,17 @@ class Model:
         self.index = faiss.read_index(self.dataset_path)
         self.embedding = CodeEmbedding(project_path)
 
-    def retrieveCode(self, idx: List[int]) -> str:
+    def retrieveCode(self, idx: List[int], metadata: Dict[str, List[int]]) -> str:
         path_list: Dict[str, List[int]] = defaultdict(list)
         allowedPattern: Dict[str, List[int]] = defaultdict(list)
 
-        for key, value_list in self.embedding.metadata.items():
+        for key, value_list in metadata.items():
             for i, value in enumerate(value_list):
                 if value in idx:
                     path_list[key].append(value)
                     allowedPattern[key].append(i)
 
-        tasks: List[Coroutine] = [self.embedding.getASTfromFile(path) for path in path_list]
+        tasks: List[Coroutine] = [self.embedding.getASTfromFile(path, get_language(path)) for path in path_list]
 
         rag_context: str = asyncio.run(self.execute_ast(tasks, path_list, allowedPattern))
 
@@ -55,15 +54,15 @@ class Model:
 
         return output
 
-    def create_prompt(self, data: Dict[str, Union[int, str]], k: int) -> str:
-        actual_instance: str = self.retrieveCode(data['line'])
+    def create_prompt(self, data: Dict[str, Union[int, str]], metadata: Dict[str, List[int]]) -> str:
+        actual_instance: str = self.retrieveCode(data['line'], metadata)
         query_embedded: NDArray = self.embedding.embed(f"{actual_instance}{data['description']}").numpy()
         _, I = self.index.search(query_embedded, self.k)
-        rag_context: str = self.retrieveCode(I)
+        rag_context: str = self.retrieveCode(I, metadata)
         return f"{actual_instance}\n\n{rag_context} Question: {data['description']}"
 
-    def __call__(self, data: Dict[str, Union[int, str]]) -> str:
-        prompt: str = self.create_prompt(data)
+    def __call__(self, data: Dict[str, Union[int, str]], metadata: Dict[str, List[int]]) -> str:
+        prompt: str = self.create_prompt(data, metadata)
         return self.parsePrompt(prompt)
 
     def parsePrompt(self, prompt: str) -> str:

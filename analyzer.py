@@ -1,3 +1,4 @@
+from utils import SCRIPT_PATH, get_filepaths, get_language
 from collections.abc import Coroutine
 from typing import Dict, List, Union
 from datetime import datetime
@@ -5,9 +6,7 @@ import os.path as osp
 import aiofiles
 import asyncio
 import json
-import os
 import re
-from utils import SCRIPT_PATH, get_filepaths, get_language
 
 VALID_PRIORITY = ['low', 'mid', 'high']
 

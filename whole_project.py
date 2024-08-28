@@ -1,4 +1,4 @@
-from obsidianScripter import Handler
+from obsidianScripter import ObsidianIntegrationHandler
 from analyzer import Analyzer
 import argparse
 
