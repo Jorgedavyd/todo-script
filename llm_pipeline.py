@@ -6,10 +6,11 @@ import torch
 import os
 
 class Model:
-    def __init__(self, source_path: str, device: str) -> None:
-        self.root_path = osp.join(SCRIPT_PATH, osp.basename(source_path))
+    def __init__(self, project_path: str, device: str) -> None:
+        self.root_path = osp.join(SCRIPT_PATH, osp.basename(project_path))
         os.makedirs(self.root_path, exist_ok = True)
-        self.RAG_path = osp.join(self.root_path, 'rag.db') ## TODO
+        self.src = '/usr/bin/todo-script'
+        self.dataset_path: str = osp.join(self.src, 'dataset', osp.basename(self.root_path), 'data.index')
         self.device = device
 
     def create_prompt(self, data: Dict[str, Union[int, str]]) -> str:

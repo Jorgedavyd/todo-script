@@ -1,41 +1,26 @@
-from RAG_handling.FAISS import FAISS_handler
-from typing import Any, Dict, List, Union
-from collections.abc import Coroutine
-from utils import get_filepaths
-import os.path as osp
-import asyncio
-import os
+from RAG_handling.embedding import CodeEmbedding
+from RAG_handling.FAISS import FAISS
+from typing import Dict, List
+from torch import Tensor
+import logging
 
-class DatasetHandler(FAISS_handler):
-    def __init__(self, project_path: str) -> None:
-        super().__init__(project_path)
-        self.src: str = '/usr/bin/todo-script/'
-        os.makedirs(osp.join(self.src, 'dataset'), exist_ok = True)
+class RuntimeHandler:
+    def __init__(self, project_path: str, dataset_path: str, meta_path: str, hidden_dim: int) -> None:
+        self.faiss = FAISS(dataset_path, meta_path, hidden_dim)
+        self.embedding = CodeEmbedding(project_path)
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
 
-    async def singleDB(self, filepath: str) -> None:
-        if path:=self.findFileDataset(filepath):
-            await self.updateDB(path)
-        else:
-            await self.addDB(path)
+    def on_written(self, filepath: str) -> None:
+        try:
+            hidden_dict: Dict[str, List[Tensor]] = self.faiss.on_written(filepath)
+            self.faiss.on_written(hidden_dict)
+        except Exception as e:
+            self.logger.error(f"Error writing single file {filepath}: {e}")
 
-    def findFileDataset(self, filepath: str, data: Dict[str, Union[str, int]]) -> :
-
-    def findDatabase(self) -> Any:
-        database_path: str = osp.join(self.src, 'dataset', osp.basename(self.project_path) + '.index')
-        if osp.exists(database_path):
-            return database_path
-        else:
-            return False
-
-    def single_file(self, filepath: str) -> None:
-        asyncio.run(self.singleDB(filepath))
-
-    def on_written(self, data: Dict[str, Union[str, int]]) -> None:
-        filepath: str = data["path"] # return the value for the written file
-        self.single_file(filepath) # updates or creates FAISS dataset
-
-    async def whole_project(self, source_path: str) -> None:
-        filepaths: List[str] = get_filepaths(source_path)
-        tasks: List[Coroutine] = [self.singleDB(filepath) for filepath in filepaths]
-        await asyncio.gather(*tasks)
-
+    def whole_project(self, source_path: str) -> None:
+        try:
+            hidden_dict: Dict[str, List[Tensor]] = self.faiss.whole_project(source_path)
+            self.faiss.whole_project(hidden_dict)
+        except Exception as e:
+            self.logger.error(f"Error writing whole project {source_path}: {e}")

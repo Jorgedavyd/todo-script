@@ -1,21 +1,17 @@
-import json
-
-from numpy._typing import NDArray
-import tree_sitter
 from utils import get_filepaths, get_language, get_languages, get_parser, setup_parsers
 from transformers import RobertaTokenizer, RobertaModel
 from tree_sitter import Parser
 from typing import Dict, List
 from torch import Tensor
+import os.path as osp
 import aiofiles
 import asyncio
 import torch
 import os
-import os.path as osp
 
 class CodeEmbedding:
     def __init__(self, project_path: str) -> None:
-        self.code: List[str] = []
+        self.code: Dict[str, List[str]] = {}
         self.project_path: str = project_path
         self.parser: Dict[str, Parser] = {language: get_parser(language, project_path) for language in get_languages(self.project_path)}
         self.src: str = '/usr/bin/todo-script'
@@ -43,7 +39,7 @@ class CodeEmbedding:
         ast = parser.parse(bytes(code, 'utf-8'))
         return ast.root_node
 
-    def preprocessAST(self, ast, filepath: str) -> List[str]:
+    def preprocessAST(self, ast) -> List[str]:
         blocks: List[str] = []
 
         def traverse(node):
@@ -58,57 +54,30 @@ class CodeEmbedding:
 
         traverse(ast)
 
-
         return blocks
 
-    def updateIdx(self, new_data: Dict[str, List[int]], filepath: str) -> None:
+    def readCode(self, asts: List, filepaths: List[str]) -> None:
+        for ast, filepath in zip(asts, filepaths):
+            blocks: List[str] = self.preprocessAST(ast)
+            self.code[filepath] = blocks
 
-        with open(self.meta_path, 'r') as file:
-            data = json.load(file)
-
-        codeIdxs: List[int] = data[filepath]
-        # pos: relative idx for blocks
-        ## Contains a list of the indices referencing position in FAISS
-
-        new_data: Dict[str, List[int]] = {
-
-        }
-        actual_values: List[int] = [*chain.from_iterable(data.values())]
-
-        missing_values: List[int] = [
-            num for num in range(1, max(actual_values))
-            if num not in actual_values
-        ]
-        if len(
-        for path, value_list in data.items():
-            for j, relIdx in enumerate(value_list):
-                for k, miss_value in enumerate(missing_values):
-                    if relIdx < miss_value:
-                        data[path][j] += k
-                        break
-
-        keep: List[NDArray] = [vec for i, vec in enumerate(
-        data.update({filepath: []})
-
-        with open(self.meta_path, 'w') as file:
-            json.dump(data, file, indent = 4)
-
-    def readCode(self, asts: List, filepath: str) -> None:
-        for ast in asts:
-            blocks: List[str] = self.preprocessAST(ast, filepath)
-            self.code.extend(blocks)
-
-    def on_written(self, filepath: str) -> List[Tensor]:
+    def on_written(self, filepath: str) -> Dict[str, List[Tensor]]:
         ast = self.getASTfromFile(filepath, get_language(filepath))
-        self.readCode([ast])
-        return [self.embed(code) for code in self.code]
+        self.readCode([ast], [filepath])
+        return {
+            filepath: [self.embed(code) for code in self.code[filepath]]
+            for filepath in [filepath]
+        }
 
-    async def run_full_project(self) -> None:
+    async def run_full_project(self, filepaths: List[str]) -> None:
         setup_parsers(self.project_path)
-        filepaths: List[str] = get_filepaths(self.project_path)
         asts: List = await asyncio.gather(*[self.getASTfromFile(filepath, get_language(filepath)) for filepath in filepaths])
-        self.readCode(asts)
+        self.readCode(asts, filepaths)
 
-    def whole_project(self) -> List[Tensor]:
-        asyncio.run(self.run_full_project())
-        return [self.embed(code) for code in self.code]
+    def whole_project(self) -> Dict[str, List[Tensor]]:
+        filepaths: List[str] = get_filepaths(self.project_path)
+        asyncio.run(self.run_full_project(filepaths))
+        return {
+            filepath: [self.embed(code) for code in self.code[filepath]]
+            for filepath in filepaths
+        }
