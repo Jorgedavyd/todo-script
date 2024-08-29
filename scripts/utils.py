@@ -3,8 +3,6 @@ from typing import List, Dict, Set
 import os.path as osp
 import os
 
-SCRIPT_PATH: str = '/usr/bin/todo-script'
-
 def get_filepaths(source_path: str) -> List[str]:
     filepaths = []
     for dirpath, _, filenames in os.walk(source_path):

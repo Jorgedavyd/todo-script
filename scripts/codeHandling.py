@@ -36,9 +36,9 @@ class Code:
     def append(self, code: List[str]) -> None:
         self.code.extend(code)
 
-    def parserTaskLine(self, line: str, idx: int, path: str) -> Dict[str, str | int]:
+    def parserTaskLine(self, block: str, idx: int, path: str) -> Dict[str, str | int]:
         pattern = r"TODO\s+(\d{2}\d{2}\d{2})\s+([A-Z])\s+(.*)"
-        match = re.match(pattern, line)
+        match = re.match(pattern, block)
 
         if match:
             date_str = match.group(1)
@@ -50,14 +50,14 @@ class Code:
 
             date_format = datetime.strptime(date_str, "%d%m%y").date()
 
-            return {
+            return Task(**{
                 "line": idx,
                 "date": date_format.isoformat(),
                 "priority": priority,
                 "description": description,
-                "language": get_language(path),
-                "path": path
-            }
+                "context": block
+            })
+
         else:
             raise ValueError('Not valid input query, TODO pattern doesn\'t match the expected one: TODO <date:%d%m%y> <priority> <description>')
     def getTasks(self) -> List[Task] | None:
@@ -65,7 +65,7 @@ class Code:
 
         for block in self.code:
             if 'TODO' in block:
-        ## todo
+                self.parserTaskLine(block)
 
         return out if len(out) > 0 else None
 

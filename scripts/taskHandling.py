@@ -13,8 +13,7 @@ class Task:
     description: str
     dueDate: str
     priority: str
-    context: Code
-    ragIdx: List[int] ## Index array for every indexing into FAISS
+    context: str
 
     def raw(self) -> Dict[str, List[int] | str | int]:
         return {
@@ -22,25 +21,21 @@ class Task:
             'description': self.description,
             'dueDate': self.dueDate,
             'priority': self.priority,
-            'context': self.context.getNL(),
+            'context': self.context,
         }
 
     def getQuery(self, dataset: RagDataset) -> str:
-        rag_context: str = self.getFromFAISS(dataset)
+        rag_context: str = '\n'.join(dataset.getRAGcontext(self))
         return f"This is my codebase: {rag_context}\nThis is my current context: {self.context}\n Prompt: {self.description}"
-
-    def getFromFAISS(self, dataset: RagDataset) -> str:
-
-        return code.raw()
 
 
 @dataclass
 class TaskDataset:
     src_path: str
-    project_path: str
+    project_name: str
 
     def __post_init__(self) -> None:
-        self.dataset_path: str = osp.join(self.src_path, osp.basename(self.project_path), 'taskDataset.json')
+        self.dataset_path: str = osp.join(self.src_path, self.project_name, 'taskDataset.json')
 
     def retrieveRaw(self) -> None:
         with open(self.dataset_path, 'r') as file:

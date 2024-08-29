@@ -15,7 +15,7 @@ class File:
         self.getOldTasks()
         self.getCode()
         self.getTasks()
-        self.taskDataset = TaskDataset(self.src_path)
+        self.taskDataset = TaskDataset(self.src_path, self.project_name)
         self.updateDatasets()
 
     def getOldTasks(self) -> None:

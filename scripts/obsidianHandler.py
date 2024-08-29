@@ -1,4 +1,5 @@
 from definitions import DUE_DATE_ICON, PRIORITY_ICONS, VALID_DEVICES
+from scripts.RAG import RagDataset
 from taskHandling import Task, TaskDataset
 from typing import Callable, List, Tuple
 from dataclasses import dataclass
@@ -11,14 +12,17 @@ import shutil
 class Obsidian:
     vault_path: str
     source_path: str
+    ragDataset: RagDataset
+    project_name: str
     device: str
+
     def __post_init__(self) -> None:
         assert (self.device in VALID_DEVICES), f"Not a valid device: {VALID_DEVICES}"
         self.project_name: str = osp.basename(self.vault_path)
         self.getTemplatePath: Callable[[str], str] = lambda x: osp.join(self.source_path, 'templates', x)
         self.getTargetPath: Callable[[str], str] = lambda x: osp.join(self.vault_path, self.project_name, x)
         self.model: Model = Model(self.device)
-        self.taskDataset: TaskDataset = TaskDataset(self.source_path)
+        self.taskDataset: TaskDataset = TaskDataset(self.source_path, self.project_name)
 
     def createMain(self) -> None:
         mainPath: str = self.getTemplatePath('main.md')
@@ -86,7 +90,8 @@ class Obsidian:
 
         obsidianTask: str = self.createObsidianTask(task)
         code_block: str = task.context
-        llama_inference: str = self.model(task.getQuery())
+
+        llama_inference: str = self.model(task.getQuery(self.ragDataset))
 
         with open(targetPath, 'a') as file, open(templatePath, 'r') as source:
             file.write('***\n')

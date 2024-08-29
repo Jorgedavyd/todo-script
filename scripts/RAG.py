@@ -89,7 +89,6 @@ class RagDataset:
         new_index = faiss.IndexFlatL2(new_dataset)
         faiss.write_index(new_index, self.dataset_path)
 
-
     def getRAGcontext(self, task: Task) -> List[str]:
         query_embedded: NDArray = self.embedding(f"{task.context}{task.description}").numpy()
         _, I = self.index.search(query_embedded, self.k)
