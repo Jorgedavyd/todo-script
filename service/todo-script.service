@@ -1,11 +1,11 @@
 [Unit]
-Description=todo script service handler, updates FAISS dataset for each project, upload TODOs to obsidian, deletes done tasks.
+Description=CodeInline-Obsidian integration for automated task management and debugging.
 After=network.target
 
 [Service]
-ExecStart= sh ./service.sh
-WorkingDirectory= /usr/bin/todo-script/service
-User=jenci
+ExecStart=/usr/bin/python3 todoScript.py
+WorkingDirectory= /usr/bin/todo-script/scripts/
+User={{USER_PLACEHOLDER}}
 Restart=on-failure
 
 [Install]

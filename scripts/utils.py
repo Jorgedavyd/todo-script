@@ -70,8 +70,8 @@ def setup_parsers(project_path: str) -> None:
         f'build/{name}.so',
         [f'tree-sitter-{language}' for language in get_languages(project_path)]
     )
-def get_parser(language: str, project_path) -> Parser:
-    name: str = osp.basename(project_path)
+def get_parser(language: str, project_name: str) -> Parser:
+    name: str = osp.basename(project_name)
     input_language: Language = Language(f'build/{name}.so', language)
     parser: Parser = Parser()
     parser.set_language(input_language)

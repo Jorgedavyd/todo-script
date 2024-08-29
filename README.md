@@ -23,38 +23,34 @@ __global__ void KernelDeclaration(void) {
     //...
 };
 ```
-2. Write your file with the declared `<leader>w` in Setup.
+Note that the format should be as follows:
+
+`TODO {DATE:ddmmyy} {PRIORITY} {DESC}`
+
+replacing `{PARAM}` with the actual value.
+
+2. Write/Save your file.
 
 Now you'll be able to see this task in your obsidian project management environment in `<vault_path>/projects/<project_name>` with an LLM inference based on your codebase and a preview of a chunk of code.
 
-# Setup for NeoVim / Vim
-1. Clone the script to /usr/bin.
+# Setup
+1. Clone the script to `/usr/bin/` or wherever you want, default config is adapted to `/usr/bin/`.
 
 ```bash
 cd /usr/bin/
 git clone https://github.com/Jorgedavyd/todo-script.git
 ```
 
-2. Add the following nonrecursive remap to nvim/vim.
+2. Add the following service to `systemctl` or use your default task manager to activate the `todoScript.py` script.
 
-```lua
-vim.keymap.set("n", "<leader>w", function()
-    vim.cmd("w")
-    local obsidian_vault_project_path = '/path/to/obsidian_vault'  -- Replace with your Obsidian vault path
-    local device = 'cuda' -- Or 'cpu'
-    -- Save the current buffer
-    local project_path = '/path/to/project'  -- Replace with your project path
-    local current_file = vim.fn.expand("%")  -- Get the current file path
-    local command = string.format(
-        "todo-script %s %s %s %s",
-        current_file,
-        obsidian_vault_project_path,
-        device,
-        project_path,
-    )
-    vim.cmd("silent !" .. command)
-end, { noremap = true, silent = true })
+```bash
+sudo systemctl start todo-script/service/todo-script.service
+sudo systemctl enable todo-script/service/todo-script.service
 ```
+
+Note that the `todo-script.service` file holds an `{{USER_PLACEHOLDER}}` that should be replaced with your actual username. Change the launching parameters of `todoScript.py` (in the code) given your installation directory and personal file tree settings, the description for each parameter is next to each variable definition as a comment.
+
+## Neovim / Vim automation
 If you want to map a template inline task:
 
 ```lua
@@ -85,7 +81,6 @@ vim.keymap.set("n", "<leader>/", function()
     vim.fn.setline(line_num, line_content .. " " .. todo_template)
 end, { noremap = true, silent = true })
 ```
-Now, every time you hit the `<leader>w` you'll be analyzing the current file for new tasks, uploading them to the respective obsidian project file with the corresponding solution of the RAG-based language model.
 
 ## Contact
 
