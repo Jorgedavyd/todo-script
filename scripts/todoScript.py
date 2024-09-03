@@ -10,7 +10,7 @@ def main(filepath: str) -> None:
     source_path: str = '/usr/bin/todo-script/' #script location
     k: int = 5 #The amount of relevant indexes for RAG.
     vault_path: str = '~/OneDrive/Extracurricular/Ilustracion/projects/' #The path to your project vault.
-    device: str = 'cuda' #The device in which the model will be running.
+    device: str = 'cpu' #The device in which the model will be running.
 
 
     project_name: str = osp.basename(filepath)
