@@ -39,7 +39,7 @@ class ProjectObserver(FileSystemEventHandler):
                         rutine(filepath)
                     self.changed_files.clear()
 
-        except KeyboardInterrupt:
-            print('Job done.')
+        except Exception as e:
+            print(f'Job done after following runtime case: {e}')
 
         observer.join()

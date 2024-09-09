@@ -40,8 +40,9 @@ class Obsidian:
             file.write('\n'.join(new_file))
 
     def deleteTasks(self, file: File) -> None:
-        for task in file.tasks:
-            self.writeTask(task)
+        if file.tasks is not None:
+            for task in file.tasks:
+                self.writeTask(task)
 
     def deleteTask(self, task: Task) -> None:
         ind: str = task.context
@@ -79,7 +80,7 @@ class Obsidian:
         with open(filepath, 'r') as file:
             lines = file.readlines()
 
-        del lines[line]
+        lines[line] = lines[line].split('TODO')[0][:-1]
 
         with open(filepath, 'w') as file:
             file.writelines(lines)
@@ -97,9 +98,7 @@ class Obsidian:
             file.write('***\n')
             for line in source.readlines():
                 if line:=line.strip():
-                    if '{{LINE_PLACEHOLDER}}' in line:
-                        line = line.replace('{{LINE_PLACEHOLDER}}', f'{task.line}')
-                    elif '{{TASK_PLACEHOLDER}}' in line:
+                    if '{{TASK_PLACEHOLDER}}' in line:
                         line = obsidianTask
                     elif '{{CODE_BLOCK_PLACEHOLDER}}' in line:
                         line = code_block
@@ -109,8 +108,9 @@ class Obsidian:
                     file.write(line + '\n')
 
     def writeTasks(self, file: File) -> None:
-        for task in file.tasks:
-            self.writeTask(task)
+        if file.tasks is not None:
+            for task in file.tasks:
+                self.writeTask(task)
 
     def __call__(self, file: File) -> None:
         self.writeTasks(file)

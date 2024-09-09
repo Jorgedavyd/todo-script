@@ -1,8 +1,7 @@
 import asyncio
 from collections import defaultdict
 from dataclasses import dataclass
-
-from numpy._typing import NDArray
+from numpy.typing import NDArray
 from codeHandling import Code
 from embedding import Embedding
 from fileHandling import File
@@ -22,7 +21,7 @@ class RagDataset:
     project_name: str
     k: int
 
-    def __init__(self) -> None:
+    def __post_init__(self) -> None:
         self.dataset_path: str = osp.join(self.source_path, self.project_name, 'ragDataset.index')
         self.embedding: Embedding = Embedding()
         self.metapath: str = osp.join(self.source_path, self.project_name, 'metadata.json')

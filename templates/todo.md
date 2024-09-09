@@ -1,5 +1,4 @@
 ***
-### Task in line {{LINE_PLACEHOLDER}}
 {{TASK_PLACEHOLDER}}
 
 ```python

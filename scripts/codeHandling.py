@@ -1,9 +1,9 @@
-from utils import get_language, get_parser
+from utils import get_parser
 from definitions import VALID_PRIORITY
 from tree_sitter import Parser
 from taskHandling import Task
 from datetime import datetime
-from typing import Dict, List
+from typing import List, Union
 import re
 
 class Code:
@@ -36,7 +36,7 @@ class Code:
     def append(self, code: List[str]) -> None:
         self.code.extend(code)
 
-    def parserTaskLine(self, block: str, idx: int, path: str) -> Dict[str, str | int]:
+    def parserTaskLine(self, block: str) -> Union[Task, None]:
         pattern = r"TODO\s+(\d{2}\d{2}\d{2})\s+([A-Z])\s+(.*)"
         match = re.match(pattern, block)
 
@@ -51,27 +51,44 @@ class Code:
             date_format = datetime.strptime(date_str, "%d%m%y").date()
 
             return Task(**{
-                "line": idx,
-                "date": date_format.isoformat(),
+                "dueDate": date_format.isoformat(),
                 "priority": priority,
                 "description": description,
                 "context": block
             })
 
         else:
-            raise ValueError('Not valid input query, TODO pattern doesn\'t match the expected one: TODO <date:%d%m%y> <priority> <description>')
-    def getTasks(self) -> List[Task] | None:
+            return
+
+    def getTasks(self, oldTasks: Union[List[Task], None]) -> Union[List[Task], None]:
         out: List[Task] = []
 
         for block in self.code:
             if 'TODO' in block:
-                self.parserTaskLine(block)
+                out.append(self.parserTaskLine(block))
 
-        return out if len(out) > 0 else None
+        for bl
+
+        out: List[Task] = list(
+            filter(
+                lambda x: x is not None,
+                out
+            )
+        )
+
+        if oldTasks is not None and len(out) > 0:
+            out.extend(oldTasks)
+            return list(set(out))
+
+        elif oldTasks is None and len(out) > 0:
+            return out
+
+        elif oldTasks is not None and len(out) == 0:
+            return
 
     def raw(self) -> List[str]:
         return self.code
 
-    def __getitem__(self, idx: int | slice):
+    def __getitem__(self, idx: Union[int, slice]):
         return self.code[idx]
 

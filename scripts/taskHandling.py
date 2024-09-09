@@ -1,23 +1,20 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Tuple, Union
 import os.path as osp
 import json
 
 from fileHandling import File
-from codeHandling import Code
 from RAG import RagDataset
 
 @dataclass
 class Task:
-    line: int
     description: str
     dueDate: str
     priority: str
     context: str
 
-    def raw(self) -> Dict[str, List[int] | str | int]:
+    def raw(self) -> Dict[str, str]:
         return {
-            'line': self.line,
             'description': self.description,
             'dueDate': self.dueDate,
             'priority': self.priority,
@@ -41,26 +38,37 @@ class TaskDataset:
         with open(self.dataset_path, 'r') as file:
             self.rawDataset = json.load(file)
 
-    def __getitem__(self, filepath: str) -> List[Task]:
-        if osp.exists(self.dataset_path):
-            self.retrieveRaw()
-        else:
+    def __getitem__(self, filepath: str) -> Union[Tuple[int, List[Task]], None]:
+        if not osp.exists(self.dataset_path):
             self.createDataset()
-            self.retrieveRaw()
 
-        fileDataset: List[Dict[str, List[int] | str | int]] = self.rawDataset[filepath]
-        tasks: List[Task] = [Task(**rawData) for rawData in fileDataset]
-        return tasks
+        self.retrieveRaw()
+
+        for idx, (path, tasks) in enumerate(self.rawDataset.items()):
+            if path == filepath:
+                tasks: List[Task] = [Task(**rawData) for rawData in tasks]
+                return idx, tasks
+        return
 
     def createDataset(self) -> None:
         with open(self.dataset_path, 'x') as file:
             json.dump({}, file, indent = 4)
 
-    def updateDataset(self, file: File) -> None:
-        updatedDataset: Dict[str, List[Dict[str, str]]] = self.rawDataset.update(
-            file.raw()
-        )
+    def updateDataset(self, file: File, oldTasks: Union[List[Task], None], dataset_idx: int) -> None:
+        newTasks: Union[List[Task], None] = file.tasks
+        out: Union[Tuple[int, List[Task]], None] = self.__getitem__(file.path)
+
+        if out is not None:
+            dataset_idx, oldTasks = out
+
+            if newTasks != oldTasks:
+                if newTasks is None:
+                    del self.rawDataset[dataset_idx]
+                else:
+                    self.rawDataset[dataset_idx] = file.raw()
+
+        if newTasks is not None:
+            self.rawDataset.append(file.raw())
 
         with open(self.dataset_path, 'w') as dataset:
-            json.dump(updatedDataset, dataset, indent = 4)
-
+            json.dump(self.rawDataset, dataset, indent = 4)
