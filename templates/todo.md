@@ -1,4 +1,6 @@
 ***
+path: {{PATH_PLACEHOLDER}}
+
 {{TASK_PLACEHOLDER}}
 
 ```python

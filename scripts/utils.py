@@ -1,7 +1,21 @@
+from pygments.lexers import get_lexer_by_name
 from tree_sitter import Language, Parser
+from pygments.token import Comment
 from typing import List, Dict, Set
 import os.path as osp
 import os
+
+def get_comment(language: str) -> str:
+    try:
+        lexer = get_lexer_by_name(language)
+        comment_tokens = [token for token, _ in lexer.get_tokens("") if token in Comment]
+        if comment_tokens:
+            return "".join(comment_tokens)
+        else:
+            return "//"
+    except ValueError:
+        return "//"
+
 
 def get_filepaths(source_path: str) -> List[str]:
     filepaths = []

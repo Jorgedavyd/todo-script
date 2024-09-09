@@ -1,19 +1,19 @@
-import asyncio
 from collections import defaultdict
 from dataclasses import dataclass
 from numpy.typing import NDArray
-from codeHandling import Code
-from embedding import Embedding
-from fileHandling import File
 from typing import Coroutine, List, Dict
 import os.path as osp
 import numpy as np
 from torch import Tensor
-import json
+import asyncio
 import faiss
+import json
 
 from taskHandling import Task
 from utils import get_language
+from codeHandling import Code
+from embedding import Embedding
+from fileHandling import File
 
 @dataclass
 class RagDataset:

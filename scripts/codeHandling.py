@@ -1,10 +1,8 @@
-from utils import get_parser
-from definitions import VALID_PRIORITY
 from tree_sitter import Parser
-from taskHandling import Task
-from datetime import datetime
 from typing import List, Union
-import re
+
+from taskHandling import Task, taskParser
+from utils import get_parser
 
 class Code:
     code: List[str] = []
@@ -37,35 +35,15 @@ class Code:
         self.code.extend(code)
 
     def parserTaskLine(self, block: str) -> Union[Task, None]:
-        pattern = r"TODO\s+(\d{2}\d{2}\d{2})\s+([A-Z])\s+(.*)"
-        match = re.match(pattern, block)
-
-        if match:
-            date_str = match.group(1)
-            priority = match.group(2).lower()
-            description = match.group(3)
-
-            if priority not in VALID_PRIORITY:
-                raise ValueError(f'Invalid priority: {priority}, expected: {VALID_PRIORITY}')
-
-            date_format = datetime.strptime(date_str, "%d%m%y").date()
-
-            return Task(**{
-                "dueDate": date_format.isoformat(),
-                "priority": priority,
-                "description": description,
-                "context": block
-            })
-
-        else:
-            return
+        return taskParser(block)
 
     def getTasks(self, oldTasks: Union[List[Task], None]) -> Union[List[Task], None]:
         out: List[Task] = []
 
         for block in self.code:
-            if 'TODO' in block:
-                out.append(self.parserTaskLine(block))
+            if len(block) > 0:
+                if 'TODO' in block:
+                    out.append(self.parserTaskLine(block))
 
         out: List[Task] = list(
             filter(

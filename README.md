@@ -44,6 +44,7 @@ git clone https://github.com/Jorgedavyd/todo-script.git
 2. Add the following service to `systemctl` or use your default task manager to activate the `todoScript.py` script.
 
 ```bash
+mv todo-script/service/todo-script.service /etc/systemd/system
 sudo systemctl start todo-script/service/todo-script.service
 sudo systemctl enable todo-script/service/todo-script.service
 ```

@@ -36,6 +36,5 @@ class File:
         return
 
     def updateDatasets(self) -> None:
-        if getattr(self, 'oldTasks') is not None:
-            self.taskDataset.updateDataset(self, self.oldTasks, self.idx)
+        self.taskDataset.updateDataset(self)
 
