@@ -80,7 +80,7 @@ class Obsidian:
         with open(filepath, 'r') as file:
             lines = file.readlines()
 
-        lines[line] = lines[line].split('TODO')[0][:-1]
+        lines[line] = lines[line].split(get_comment_sign(language))[0][:-1]
 
         with open(filepath, 'w') as file:
             file.writelines(lines)
@@ -113,8 +113,8 @@ class Obsidian:
                 self.writeTask(task)
 
     def __call__(self, file: File) -> None:
-        self.writeTasks(file)
         self.deleteTasks(file)
+        self.writeTasks(file)
 
     def createTaskTemplate(self) -> None:
         taskPath: str = self.getTargetPath('todo.md')

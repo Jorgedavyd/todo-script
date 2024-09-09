@@ -67,8 +67,6 @@ class Code:
             if 'TODO' in block:
                 out.append(self.parserTaskLine(block))
 
-        for bl
-
         out: List[Task] = list(
             filter(
                 lambda x: x is not None,
